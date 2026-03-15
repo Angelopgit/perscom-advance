@@ -1,0 +1,30 @@
+{
+  "_comment": "PERSCOM Advance — Unit Configuration File. Edit these values to brand PERSCOM for your unit.",
+
+  "unitName": "My Milsim Unit",
+  "unitAbbreviation": "MMU",
+  "unitLogo": "/uploads/logo.png",
+
+  "primaryColor": "#1e40af",
+  "accentColor": "#3b82f6",
+
+  "discordGuildId": "",
+  "discordBotToken": "",
+
+  "timezone": "America/New_York",
+  "theme": "dark",
+
+  "welcomeMessage": "Welcome to PERSCOM. Please log in to continue.",
+
+  "features": {
+    "operations": true,
+    "evaluations": true,
+    "orbat": true,
+    "documents": true,
+    "gearLoadouts": true,
+    "attendance": true,
+    "spotlights": true
+  },
+
+  "ranks": []
+}
