@@ -38,6 +38,8 @@ const usersRoutes         = require('./routes/users');
 const attendanceRoutes    = require('./routes/attendance');
 const spotlightsRoutes    = require('./routes/spotlights');
 const ranksRoutes         = require('./routes/ranks');
+const customizeRoutes     = require('./routes/customize');
+const organizationRoutes  = require('./routes/organization');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -105,6 +107,13 @@ app.use('/api/users',         usersRoutes);
 app.use('/api/attendance',    attendanceRoutes);
 app.use('/api/spotlights',    spotlightsRoutes);
 app.use('/api/ranks',         ranksRoutes);
+app.use('/api/customize',     customizeRoutes);
+app.use('/api/organization',  organizationRoutes);
+
+// ─── Admin Customization UI ───────────────────────────────────────────────────
+app.get('/admin/customize', (req, res) => {
+  res.sendFile(path.join(__dirname, 'customize/index.html'));
+});
 
 // ─── Frontend (Production) ────────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production') {

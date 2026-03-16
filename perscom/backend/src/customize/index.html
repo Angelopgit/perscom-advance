@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PERSCOM — Customization</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#03060f;--surf:#080e1a;--surf2:#0d1525;--surf3:#111d30;
+  --border:#1a2a42;--border2:#1e3a5f;
+  --text:#c8d8e8;--muted:#5a7a9a;--bright:#e2f0ff;
+  --accent:#2563eb;--accent2:#3b82f6;
+  --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;
+  --mono:'Courier New',Courier,monospace;
+  --sidebar:240px;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(37,99,235,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+/* ── Sidebar ── */
+.sidebar{width:var(--sidebar);background:var(--surf);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:10;flex-shrink:0}
+.sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
+.sidebar-logo .badge{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--accent2);text-transform:uppercase}
+.sidebar-logo h1{font-size:14px;font-weight:700;color:var(--bright);margin-top:4px}
+.nav{flex:1;padding:12px 0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:13px;color:var(--muted);border-left:2px solid transparent;transition:all .2s;user-select:none}
+.nav-item:hover{color:var(--text);background:var(--surf2)}
+.nav-item.active{color:var(--bright);border-left-color:var(--accent2);background:rgba(37,99,235,.1)}
+.nav-item .icon{width:18px;text-align:center;font-size:15px;flex-shrink:0}
+.nav-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px 16px 6px;color:var(--muted)}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted)}
+
+/* ── Main ── */
+.main{margin-left:var(--sidebar);flex:1;padding:32px;position:relative;z-index:1;min-height:100vh}
+.panel{display:none}.panel.active{display:block}
+.panel-header{margin-bottom:28px}
+.panel-label{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);margin-bottom:6px}
+.panel-title{font-size:24px;font-weight:700;color:var(--bright)}
+.panel-sub{margin-top:6px;color:var(--muted);font-size:13px}
+
+/* ── Cards / Sections ── */
+.card{background:var(--surf);border:1px solid var(--border);padding:24px;margin-bottom:20px;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.card-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:16px}
+.section-divider{height:1px;background:var(--border);margin:20px 0}
+
+/* ── Form Elements ── */
+.field{margin-bottom:18px}
+.field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.field input[type=text],.field input[type=number],.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent2)}
+.field-hint{margin-top:5px;font-size:11px;color:var(--muted);font-family:var(--mono)}
+.field-row{display:grid;gap:16px}
+.field-row.cols-2{grid-template-columns:1fr 1fr}
+.field-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+.field-row.cols-4{grid-template-columns:repeat(4,1fr)}
+.color-row{display:flex;align-items:center;gap:10px}
+.color-row input[type=color]{width:44px;height:36px;padding:3px;border:1px solid var(--border);background:var(--bg);cursor:pointer;flex-shrink:0}
+.color-row input[type=text]{flex:1}
+.color-swatch{width:20px;height:20px;border:1px solid var(--border);flex-shrink:0}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%)}
+.btn-primary:hover{background:var(--accent2)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.btn-danger:hover{background:rgba(239,68,68,.25)}
+.btn-success{background:#15803d;color:#fff;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%)}
+.btn-sm{padding:6px 12px;font-size:10px}
+.btn-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* ── Alert ── */
+.alert{padding:10px 14px;border-left:3px solid;font-size:12px;line-height:1.5;display:none;font-family:var(--mono)}
+.alert.show{display:block}
+.alert.success{border-color:var(--green);background:rgba(34,197,94,.08);color:#86efac}
+.alert.error{border-color:var(--red);background:rgba(239,68,68,.08);color:#fca5a5}
+.alert.info{border-color:var(--accent2);background:rgba(59,130,246,.08);color:#93c5fd}
+
+/* ── Theme Preview ── */
+.theme-preview{background:var(--surf2);border:1px solid var(--border);padding:16px;margin-bottom:20px}
+.preview-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.preview-bar{display:flex;gap:8px;align-items:center}
+.preview-swatch{width:32px;height:32px;border-radius:0;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,.5);font-family:var(--mono)}
+
+/* ── Ranks Grid ── */
+.ranks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px}
+.rank-card{background:var(--surf2);border:1px solid var(--border);padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;cursor:default}
+.rank-card:hover{border-color:var(--border2)}
+.rank-icon-wrap{width:52px;height:52px;background:var(--surf3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden}
+.rank-icon-wrap:hover::after{content:'UPLOAD';position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;font-size:8px;letter-spacing:2px;font-family:var(--mono);color:var(--accent2)}
+.rank-icon-wrap img{width:100%;height:100%;object-fit:contain}
+.rank-icon-placeholder{font-size:20px;color:var(--muted)}
+.rank-name{font-size:12px;font-weight:600;color:var(--bright);text-align:center}
+.rank-abbr{font-family:var(--mono);font-size:11px;color:var(--accent2)}
+.rank-grade{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.rank-actions{display:flex;gap:6px;margin-top:4px}
+input[type=file].hidden{display:none}
+
+/* ── Org Tree ── */
+.org-tree{margin-top:16px}
+.org-platoon{background:var(--surf2);border:1px solid var(--border);margin-bottom:12px}
+.org-platoon-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer}
+.org-platoon-header .expand{color:var(--muted);font-size:11px;transition:transform .2s}
+.org-platoon-header.open .expand{transform:rotate(90deg)}
+.org-platoon-name{font-size:13px;font-weight:600;color:var(--bright);flex:1}
+.org-platoon-designation{font-family:var(--mono);font-size:10px;color:var(--accent2);margin-right:8px}
+.org-platoon-body{padding:12px 16px;display:none}
+.org-platoon-body.open{display:block}
+.org-squad{background:var(--surf3);border:1px solid var(--border);margin-bottom:8px}
+.org-squad-header{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer}
+.org-squad-name{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.org-squad-body{padding:8px 12px;display:none}
+.org-squad-body.open{display:block}
+.org-fireteam-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.org-fireteam{background:var(--surf);border:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:12px}
+.org-fireteam .type-badge{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.org-fireteam .size{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.org-positions{margin-top:8px}
+.position-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.position-item:last-child{border:none}
+.pos-lead{font-family:var(--mono);font-size:9px;color:var(--yellow);letter-spacing:1px}
+.add-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--accent2);cursor:pointer;padding:6px 0;border:none;background:none}
+.add-btn:hover{color:var(--bright)}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surf);border:1px solid var(--border2);padding:28px;width:100%;max-width:480px;position:relative;max-height:90vh;overflow-y:auto}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.modal h3{font-size:16px;font-weight:700;color:var(--bright);margin-bottom:20px}
+.modal-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px}
+.modal-close:hover{color:var(--text)}
+
+/* ── Bg Upload ── */
+.bg-upload-box{border:2px dashed var(--border);padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative}
+.bg-upload-box:hover{border-color:var(--accent2)}
+.bg-upload-box.has-image{border-style:solid;border-color:var(--accent)}
+.bg-preview{width:100%;max-height:200px;object-fit:cover;display:none;margin-bottom:10px}
+.bg-preview.show{display:block}
+.bg-upload-hint{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.bg-upload-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* ── Theme Layout — controls + live preview ── */
+.theme-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+.theme-preview-pane{position:sticky;top:24px}
+.preview-window{border:1px solid var(--border);overflow:hidden;border-radius:0;position:relative}
+.preview-window-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.preview-window-label::after{content:'LIVE';font-size:8px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:var(--green);padding:1px 6px}
+/* The mini-app inside the preview */
+.mini-app{display:flex;width:820px;height:520px;transform:scale(0.455);transform-origin:top left;pointer-events:none;user-select:none}
+.mini-sidebar{width:200px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.08)}
+.mini-sidebar-logo{padding:14px 12px 10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.mini-sidebar-abbr{font-family:var(--mono);font-size:8px;letter-spacing:2px;margin-bottom:2px}
+.mini-sidebar-name{font-size:11px;font-weight:700;color:#e2f0ff}
+.mini-nav-item{display:flex;align-items:center;gap:7px;padding:7px 12px;font-size:10px;color:rgba(255,255,255,.4);border-left:2px solid transparent}
+.mini-nav-item.active-nav{color:#e2f0ff;border-left-width:2px}
+.mini-main{flex:1;display:flex;flex-direction:column}
+.mini-topbar{height:36px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;padding:0 14px;gap:8px}
+.mini-topbar-title{font-size:10px;font-weight:600;color:#e2f0ff;flex:1}
+.mini-topbar-badge{font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:2px 6px;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5)}
+.mini-content{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px}
+.mini-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mini-stat{padding:10px;border:1px solid rgba(255,255,255,.06)}
+.mini-stat-val{font-size:18px;font-weight:700;color:#e2f0ff;font-family:var(--mono)}
+.mini-stat-label{font-size:7px;color:rgba(255,255,255,.4);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.mini-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mini-card{padding:12px;border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden}
+.mini-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.mini-card-label{font-size:7px;font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.mini-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;font-size:8px;font-family:var(--mono);letter-spacing:1px;color:#fff;border:none;cursor:default;clip-path:polygon(3px 0%,100% 0%,calc(100% - 3px) 100%,0% 100%)}
+.mini-btn-ghost{background:transparent!important;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5)!important;clip-path:none}
+.mini-table{width:100%;border-collapse:collapse}
+.mini-table th{font-size:7px;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.35);padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.06)}
+.mini-table td{font-size:8px;padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.04);color:rgba(255,255,255,.7)}
+.mini-badge{display:inline-block;font-size:7px;font-family:var(--mono);padding:1px 5px;border:1px solid}
+.mini-progress{height:4px;border:1px solid rgba(255,255,255,.1);margin-top:4px}
+.mini-progress-fill{height:100%}
+.mini-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px}
+/* Preview wrapper — clips to correct rendered size */
+.preview-frame{width:373px;height:237px;overflow:hidden;position:relative}
+
+/* ── Spinner ── */
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--surf)}
+::-webkit-scrollbar-thumb{background:var(--border2)}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .main{margin-left:0;padding:16px}
+  .field-row.cols-2,.field-row.cols-3,.field-row.cols-4{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="badge">PERSCOM Advance</div>
+    <h1>Customization</h1>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Appearance</div>
+    <div class="nav-item active" data-panel="theme" onclick="showPanel('theme',this)">
+      <span class="icon">🎨</span> Theme &amp; Colors
+    </div>
+    <div class="nav-item" data-panel="backgrounds" onclick="showPanel('backgrounds',this)">
+      <span class="icon">🖼</span> Backgrounds
+    </div>
+    <div class="nav-label">Unit Structure</div>
+    <div class="nav-item" data-panel="ranks" onclick="showPanel('ranks',this)">
+      <span class="icon">🏅</span> Ranks &amp; Icons
+    </div>
+    <div class="nav-item" data-panel="organization" onclick="showPanel('organization',this)">
+      <span class="icon">🗂</span> Organization
+    </div>
+  </nav>
+  <div class="sidebar-footer">PERSCOM Advance v1.0</div>
+</aside>
+
+<!-- ── Main Content ── -->
+<main class="main">
+
+  <!-- ────────────────── THEME PANEL ────────────────── -->
+  <div class="panel active" id="panel-theme">
+    <div class="panel-header">
+      <div class="panel-label">Appearance / Theme</div>
+      <div class="panel-title">Theme &amp; Colors</div>
+      <div class="panel-sub">Customize your unit's color scheme. The preview on the right updates live as you make changes.</div>
+    </div>
+
+    <div class="theme-layout">
+      <!-- Controls column -->
+      <div>
+        <div class="card">
+          <div class="field-row cols-2">
+            <div class="field">
+              <label>Primary Color</label>
+              <div class="color-row">
+                <input type="color" id="primaryColor" oninput="syncColor('primaryColor','primaryColorHex')">
+                <input type="text" id="primaryColorHex" placeholder="#1e40af" maxlength="7" oninput="syncHex('primaryColor','primaryColorHex')">
+              </div>
+              <div class="field-hint">Buttons, active states, accent bar</div>
+            </div>
+            <div class="field">
+              <label>Accent / Link Color</label>
+              <div class="color-row">
+                <input type="color" id="accentColor" oninput="syncColor('accentColor','accentColorHex')">
+                <input type="text" id="accentColorHex" placeholder="#3b82f6" maxlength="7" oninput="syncHex('accentColor','accentColorHex')">
+              </div>
+              <div class="field-hint">Links, badges, labels</div>
+            </div>
+            <div class="field">
+              <label>Sidebar Background</label>
+              <div class="color-row">
+                <input type="color" id="sidebarColor" oninput="syncColor('sidebarColor','sidebarColorHex')">
+                <input type="text" id="sidebarColorHex" placeholder="#080e1a" maxlength="7" oninput="syncHex('sidebarColor','sidebarColorHex')">
+              </div>
+            </div>
+            <div class="field">
+              <label>Navbar Background</label>
+              <div class="color-row">
+                <input type="color" id="navbarColor" oninput="syncColor('navbarColor','navbarColorHex')">
+                <input type="text" id="navbarColorHex" placeholder="#080e1a" maxlength="7" oninput="syncHex('navbarColor','navbarColorHex')">
+              </div>
+            </div>
+            <div class="field">
+              <label>Card Background</label>
+              <div class="color-row">
+                <input type="color" id="cardColor" oninput="syncColor('cardColor','cardColorHex')">
+                <input type="text" id="cardColorHex" placeholder="#0d1525" maxlength="7" oninput="syncHex('cardColor','cardColorHex')">
+              </div>
+            </div>
+            <div class="field">
+              <label>Body Text Color</label>
+              <div class="color-row">
+                <input type="color" id="textColor" oninput="syncColor('textColor','textColorHex')">
+                <input type="text" id="textColorHex" placeholder="#c8d8e8" maxlength="7" oninput="syncHex('textColor','textColorHex')">
+              </div>
+            </div>
+            <div class="field">
+              <label>Danger / Error Color</label>
+              <div class="color-row">
+                <input type="color" id="dangerColor" oninput="syncColor('dangerColor','dangerColorHex')">
+                <input type="text" id="dangerColorHex" placeholder="#ef4444" maxlength="7" oninput="syncHex('dangerColor','dangerColorHex')">
+              </div>
+            </div>
+            <div class="field">
+              <label>Success / Active Color</label>
+              <div class="color-row">
+                <input type="color" id="successColor" oninput="syncColor('successColor','successColorHex')">
+                <input type="text" id="successColorHex" placeholder="#22c55e" maxlength="7" oninput="syncHex('successColor','successColorHex')">
+              </div>
+            </div>
+          </div>
+
+          <div class="section-divider"></div>
+          <div class="card-title">Custom CSS</div>
+          <div class="field">
+            <label>Inject Custom CSS</label>
+            <textarea id="customCSS" rows="5" placeholder="/* Add custom styles here */&#10;.perscom-sidebar { font-size: 14px; }"></textarea>
+            <div class="field-hint">Advanced: injected into every page. Use with care.</div>
+          </div>
+
+          <div class="section-divider"></div>
+          <div class="alert" id="theme-alert"></div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" onclick="resetThemeDefaults()">Reset to Defaults</button>
+            <button class="btn btn-primary" id="btn-save-theme" onclick="saveTheme()">Save Theme</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live preview column -->
+      <div class="theme-preview-pane">
+        <div class="preview-window-label">Interface Preview</div>
+        <div class="preview-window">
+          <div class="preview-frame">
+            <div class="mini-app" id="mini-app">
+              <!-- Mini sidebar -->
+              <div class="mini-sidebar" id="prev-sidebar">
+                <div class="mini-sidebar-logo">
+                  <div class="mini-sidebar-abbr" id="prev-abbr" style="color:#3b82f6">1ST RB</div>
+                  <div class="mini-sidebar-name">Unit Command</div>
+                </div>
+                <div class="mini-nav-item active-nav" id="prev-nav-active" style="font-size:10px">⬡ Dashboard</div>
+                <div class="mini-nav-item" style="font-size:10px">👤 Personnel</div>
+                <div class="mini-nav-item" style="font-size:10px">🎯 Operations</div>
+                <div class="mini-nav-item" style="font-size:10px">🗂 ORBAT</div>
+                <div class="mini-nav-item" style="font-size:10px">🎨 Customize</div>
+              </div>
+              <!-- Mini main -->
+              <div class="mini-main" id="prev-main">
+                <div class="mini-topbar" id="prev-topbar">
+                  <div class="mini-topbar-title">Dashboard</div>
+                  <div class="mini-topbar-badge">COMMAND</div>
+                </div>
+                <div class="mini-content">
+                  <!-- Stats -->
+                  <div class="mini-stats">
+                    <div class="mini-stat" id="prev-card1"><div class="mini-stat-val">24</div><div class="mini-stat-label">Personnel</div></div>
+                    <div class="mini-stat" id="prev-card2"><div class="mini-stat-val">87%</div><div class="mini-stat-label">Attendance</div></div>
+                    <div class="mini-stat" id="prev-card3"><div class="mini-stat-val">12</div><div class="mini-stat-label">Ops</div></div>
+                    <div class="mini-stat" id="prev-card4"><div class="mini-stat-val">4</div><div class="mini-stat-label">Pending</div></div>
+                  </div>
+                  <!-- Row -->
+                  <div class="mini-row">
+                    <div class="mini-card" id="prev-card5">
+                      <div class="mini-card-label" id="prev-accent-label">Recent Activity</div>
+                      <div style="font-size:8px;color:rgba(255,255,255,.6);line-height:1.7">
+                        <span class="mini-dot" id="prev-dot-green"></span>SGT Morrison promoted<br>
+                        <span class="mini-dot" id="prev-dot-accent" style="border-radius:0"></span>OP IRON THUNDER done<br>
+                        <span class="mini-dot" id="prev-dot-yellow" style="background:#f59e0b"></span>PFC Reyes joined Alpha
+                      </div>
+                    </div>
+                    <div class="mini-card" id="prev-card6">
+                      <div class="mini-card-label" id="prev-accent-label2">Next Op</div>
+                      <div style="font-size:9px;font-weight:700;color:#e2f0ff;margin-bottom:6px">OP SILENT EDGE</div>
+                      <div class="mini-badge" id="prev-badge-blue" style="font-size:7px">PLANNED</div>
+                      <div class="mini-progress" style="margin-top:8px"><div class="mini-progress-fill" id="prev-progress" style="width:70%"></div></div>
+                    </div>
+                  </div>
+                  <!-- Buttons row -->
+                  <div style="display:flex;gap:8px;align-items:center;margin-top:2px">
+                    <div class="mini-btn" id="prev-btn-primary">+ Add Personnel</div>
+                    <div class="mini-btn mini-btn-ghost">Export</div>
+                    <div class="mini-badge" id="prev-badge-success">Active</div>
+                    <div class="mini-badge" id="prev-badge-danger">Alert</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:8px;text-align:center;letter-spacing:1px">LIVE PREVIEW — UPDATES AS YOU EDIT</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────────────── BACKGROUNDS PANEL ────────────────── -->
+  <div class="panel" id="panel-backgrounds">
+    <div class="panel-header">
+      <div class="panel-label">Appearance / Backgrounds</div>
+      <div class="panel-title">Background Images</div>
+      <div class="panel-sub">Upload custom backgrounds. Images are auto-resized client-side before upload to keep file sizes small.</div>
+    </div>
+
+    <div class="field-row cols-2">
+
+      <div class="card">
+        <div class="card-title">Login Screen Background</div>
+        <div class="bg-upload-box" id="login-drop" onclick="document.getElementById('loginBgInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event,'login')">
+          <img class="bg-preview" id="login-preview" src="" alt="Login background preview">
+          <div class="bg-upload-hint">Click or drag to upload</div>
+          <div class="bg-upload-sub">JPG, PNG, or WebP — max 5 MB<br>Will be resized to 1920×1080 max</div>
+        </div>
+        <input type="file" class="hidden" id="loginBgInput" accept="image/jpeg,image/png,image/webp" onchange="handleBgSelect(event,'login')">
+        <div class="alert" id="login-bg-alert" style="margin-top:10px"></div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-ghost btn-sm" id="btn-remove-login-bg" onclick="removeBg('login')" style="display:none">Remove</button>
+          <button class="btn btn-primary btn-sm" id="btn-upload-login-bg" onclick="uploadBg('login')" disabled>Upload</button>
+        </div>
+        <div class="field" style="margin-top:14px">
+          <label>Overlay Opacity <span id="overlay-opacity-val">60%</span></label>
+          <input type="range" id="loginOverlayOpacity" min="0" max="1" step="0.05" value="0.6"
+                 oninput="document.getElementById('overlay-opacity-val').textContent=Math.round(this.value*100)+'%'">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">App Background</div>
+        <div class="bg-upload-box" id="app-drop" onclick="document.getElementById('appBgInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event,'app')">
+          <img class="bg-preview" id="app-preview" src="" alt="App background preview">
+          <div class="bg-upload-hint">Click or drag to upload</div>
+          <div class="bg-upload-sub">JPG, PNG, or WebP — max 5 MB<br>Will be resized to 1920×1080 max</div>
+        </div>
+        <input type="file" class="hidden" id="appBgInput" accept="image/jpeg,image/png,image/webp" onchange="handleBgSelect(event,'app')">
+        <div class="alert" id="app-bg-alert" style="margin-top:10px"></div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-ghost btn-sm" id="btn-remove-app-bg" onclick="removeBg('app')" style="display:none">Remove</button>
+          <button class="btn btn-primary btn-sm" id="btn-upload-app-bg" onclick="uploadBg('app')" disabled>Upload</button>
+        </div>
+        <div class="field" style="margin-top:14px">
+          <label>Blur Amount <span id="bg-blur-val">0px</span></label>
+          <input type="range" id="appBackgroundBlur" min="0" max="20" step="1" value="0"
+                 oninput="document.getElementById('bg-blur-val').textContent=this.value+'px'">
+        </div>
+      </div>
+    </div>
+
+    <div class="alert" id="bg-save-alert"></div>
+    <button class="btn btn-primary" onclick="saveBgSettings()">Save Background Settings</button>
+  </div>
+
+  <!-- ────────────────── RANKS PANEL ────────────────── -->
+  <div class="panel" id="panel-ranks">
+    <div class="panel-header">
+      <div class="panel-label">Unit Structure / Ranks</div>
+      <div class="panel-title">Ranks &amp; Icons</div>
+      <div class="panel-sub">Add, edit, or remove ranks. Click a rank icon to upload a new one — images are automatically resized to 128×128 in your browser before uploading.</div>
+    </div>
+
+    <div class="card">
+      <div class="btn-row" style="margin-bottom:16px">
+        <button class="btn btn-primary btn-sm" onclick="openRankModal()">+ Add Rank</button>
+        <div class="alert" id="ranks-alert" style="flex:1;margin:0"></div>
+      </div>
+      <div class="ranks-grid" id="ranks-grid">
+        <div style="color:var(--muted);font-size:13px;padding:8px">Loading ranks…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────────────── ORGANIZATION PANEL ────────────────── -->
+  <div class="panel" id="panel-organization">
+    <div class="panel-header">
+      <div class="panel-label">Unit Structure / Organization</div>
+      <div class="panel-title">Organization Builder</div>
+      <div class="panel-sub">Build your unit's hierarchy — platoons, squads, fireteams/teams, and leadership positions.</div>
+    </div>
+
+    <div class="card">
+      <div class="btn-row" style="margin-bottom:16px">
+        <button class="btn btn-primary btn-sm" onclick="openOrgModal('platoon')">+ Add Platoon</button>
+        <div class="alert" id="org-alert" style="flex:1;margin:0"></div>
+      </div>
+      <div class="org-tree" id="org-tree">
+        <div style="color:var(--muted);font-size:13px;padding:8px">Loading organization…</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Rank Modal ── -->
+<div class="modal-overlay" id="rank-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('rank-modal')">×</button>
+    <h3 id="rank-modal-title">Add Rank</h3>
+    <input type="hidden" id="rank-edit-id">
+    <div class="field-row cols-2">
+      <div class="field">
+        <label>Rank Name</label>
+        <input type="text" id="rank-name" placeholder="Sergeant">
+      </div>
+      <div class="field">
+        <label>Abbreviation</label>
+        <input type="text" id="rank-abbr" placeholder="SGT" maxlength="8">
+      </div>
+      <div class="field">
+        <label>Pay Grade</label>
+        <input type="text" id="rank-grade" placeholder="E-5" maxlength="8">
+      </div>
+      <div class="field">
+        <label>Tier (sort order)</label>
+        <input type="number" id="rank-tier" placeholder="5" min="0" max="99">
+      </div>
+    </div>
+    <div class="alert" id="rank-modal-alert"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('rank-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRank()">Save Rank</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Org Modal ── -->
+<div class="modal-overlay" id="org-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('org-modal')">×</button>
+    <h3 id="org-modal-title">Add</h3>
+    <input type="hidden" id="org-modal-type">
+    <input type="hidden" id="org-modal-parent-id">
+    <input type="hidden" id="org-modal-edit-id">
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="org-name" placeholder="">
+    </div>
+    <div class="field" id="org-designation-field">
+      <label>Designation / Short Name</label>
+      <input type="text" id="org-designation" placeholder="">
+    </div>
+    <div class="field" id="org-type-field">
+      <label>Type</label>
+      <select id="org-type">
+        <option value="infantry">Infantry</option>
+        <option value="armor">Armor</option>
+        <option value="aviation">Aviation</option>
+        <option value="support">Support</option>
+        <option value="hq">HQ / Command</option>
+        <option value="weapons">Weapons</option>
+        <option value="recon">Recon</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="field" id="org-size-field">
+      <label>Max Manning Size</label>
+      <input type="number" id="org-max-size" placeholder="9" min="1" max="200">
+    </div>
+    <div class="field" id="org-ft-type-field" style="display:none">
+      <label>Team Type</label>
+      <select id="org-ft-type">
+        <option value="fireteam">Fireteam</option>
+        <option value="crew">Crew</option>
+        <option value="team">Team</option>
+        <option value="section">Section</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Notes (optional)</label>
+      <input type="text" id="org-notes" placeholder="">
+    </div>
+    <div class="alert" id="org-modal-alert"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('org-modal')">Cancel</button>
+      <button class="btn btn-primary" id="org-save-btn" onclick="saveOrgItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Position Modal ── -->
+<div class="modal-overlay" id="pos-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('pos-modal')">×</button>
+    <h3 id="pos-modal-title">Add Position</h3>
+    <input type="hidden" id="pos-unit-type">
+    <input type="hidden" id="pos-unit-id">
+    <input type="hidden" id="pos-edit-id">
+    <div class="field-row cols-2">
+      <div class="field">
+        <label>Position Title</label>
+        <input type="text" id="pos-title" placeholder="Squad Leader">
+      </div>
+      <div class="field">
+        <label>Abbreviation</label>
+        <input type="text" id="pos-abbr" placeholder="SL" maxlength="8">
+      </div>
+    </div>
+    <div class="field">
+      <label>
+        <input type="checkbox" id="pos-is-lead"> &nbsp; This is a lead / command position
+      </label>
+    </div>
+    <div class="alert" id="pos-modal-alert"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('pos-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePosition()">Save Position</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// Globals
+// ─────────────────────────────────────────────────────────────
+let bgFiles = { login: null, app: null };
+let orgData = [];
+let ranksData = [];
+
+// ─────────────────────────────────────────────────────────────
+// Panel Navigation
+// ─────────────────────────────────────────────────────────────
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'ranks')        loadRanks();
+  if (id === 'organization') loadOrg();
+  if (id === 'theme')        loadTheme();
+  if (id === 'backgrounds')  loadBgSettings();
+}
+
+// ─────────────────────────────────────────────────────────────
+// Alert helper
+// ─────────────────────────────────────────────────────────────
+function showAlert(id, type, msg, duration=4000) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `alert ${type} show`;
+  el.textContent = msg;
+  if (duration) setTimeout(() => { el.className = 'alert'; }, duration);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Modal helpers
+// ─────────────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ─────────────────────────────────────────────────────────────
+// THEME
+// ─────────────────────────────────────────────────────────────
+function syncColor(colorId, hexId) {
+  document.getElementById(hexId).value = document.getElementById(colorId).value;
+  updatePreview();
+}
+function syncHex(colorId, hexId) {
+  const v = document.getElementById(hexId).value;
+  if (/^#[0-9a-f]{6}$/i.test(v)) {
+    document.getElementById(colorId).value = v;
+    updatePreview();
+  }
+}
+function updatePreview() {
+  const get = (id) => document.getElementById(id + 'Hex')?.value || document.getElementById(id)?.value || '';
+  const primary  = get('primaryColor')  || '#1e40af';
+  const accent   = get('accentColor')   || '#3b82f6';
+  const sidebar  = get('sidebarColor')  || '#080e1a';
+  const navbar   = get('navbarColor')   || '#080e1a';
+  const card     = get('cardColor')     || '#0d1525';
+  const danger   = get('dangerColor')   || '#ef4444';
+  const success  = get('successColor')  || '#22c55e';
+
+  const s = (id, style) => { const el = document.getElementById(id); if (el) Object.assign(el.style, style); };
+
+  // Sidebar
+  s('prev-sidebar', { background: sidebar });
+  s('prev-abbr',    { color: accent });
+  s('prev-nav-active', { borderLeftColor: primary, background: `${primary}22`, color: '#e2f0ff' });
+
+  // Topbar
+  s('prev-topbar', { background: navbar });
+
+  // Cards
+  ['prev-card1','prev-card2','prev-card3','prev-card4','prev-card5','prev-card6'].forEach(id => {
+    s(id, { background: card });
+    const before = document.getElementById(id);
+    if (before) before.style.setProperty('--card-accent', primary);
+  });
+
+  // Accent bar on cards (::before pseudo — use box-shadow trick on a child)
+  ['prev-card5','prev-card6'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.borderTopColor = primary;
+  });
+
+  // Accent text labels
+  ['prev-accent-label','prev-accent-label2'].forEach(id => s(id, { color: accent }));
+
+  // Dots
+  s('prev-dot-green',  { background: success });
+  s('prev-dot-accent', { background: accent });
+
+  // Badge colors
+  s('prev-badge-blue',    { borderColor: `${accent}88`, color: accent, background: `${accent}18` });
+  s('prev-badge-success', { borderColor: `${success}88`, color: success, background: `${success}18` });
+  s('prev-badge-danger',  { borderColor: `${danger}88`, color: danger, background: `${danger}18` });
+
+  // Button
+  s('prev-btn-primary', { background: primary });
+
+  // Progress bar
+  s('prev-progress', { background: primary });
+}
+
+async function loadTheme() {
+  try {
+    const r = await fetch('/api/customize'); const d = await r.json();
+    const map = {
+      primaryColor: d.primaryColor, accentColor: d.accentColor,
+      sidebarColor: d.sidebarColor, navbarColor: d.navbarColor,
+      cardColor: d.cardColor, textColor: d.textColor,
+      dangerColor: d.dangerColor, successColor: d.successColor,
+    };
+    for (const [k, v] of Object.entries(map)) {
+      const cp = document.getElementById(k);
+      const tx = document.getElementById(k + 'Hex');
+      if (cp) cp.value = v || '#000000';
+      if (tx) tx.value = v || '';
+    }
+    document.getElementById('customCSS').value = d.customCSS || '';
+    updatePreview();
+  } catch {}
+}
+
+function resetThemeDefaults() {
+  const defaults = {
+    primaryColor:'#1e40af', accentColor:'#3b82f6', sidebarColor:'#080e1a',
+    navbarColor:'#080e1a', cardColor:'#0d1525', textColor:'#c8d8e8',
+    dangerColor:'#ef4444', successColor:'#22c55e',
+  };
+  for (const [k, v] of Object.entries(defaults)) {
+    const cp = document.getElementById(k); const tx = document.getElementById(k + 'Hex');
+    if (cp) cp.value = v; if (tx) tx.value = v;
+  }
+  document.getElementById('customCSS').value = '';
+  updateSwatches();
+}
+
+async function saveTheme() {
+  const btn = document.getElementById('btn-save-theme');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving…';
+  const body = {};
+  ['primaryColor','accentColor','sidebarColor','navbarColor','cardColor','textColor','dangerColor','successColor'].forEach(k => {
+    body[k] = document.getElementById(k + 'Hex')?.value || document.getElementById(k)?.value;
+  });
+  body.customCSS = document.getElementById('customCSS').value;
+  try {
+    await fetch('/api/customize/theme', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    showAlert('theme-alert','success','✓ Theme saved.');
+  } catch { showAlert('theme-alert','error','✗ Save failed.'); }
+  btn.disabled = false; btn.textContent = 'Save Theme';
+}
+
+// ─────────────────────────────────────────────────────────────
+// BACKGROUNDS — client-side canvas resize
+// ─────────────────────────────────────────────────────────────
+const MAX_BG_W = 1920, MAX_BG_H = 1080;
+
+async function loadBgSettings() {
+  try {
+    const r = await fetch('/api/customize'); const d = await r.json();
+    if (d.loginBackground) showBgPreview('login', d.loginBackground);
+    if (d.appBackground)   showBgPreview('app', d.appBackground);
+    if (d.loginOverlayOpacity !== undefined) {
+      document.getElementById('loginOverlayOpacity').value = d.loginOverlayOpacity;
+      document.getElementById('overlay-opacity-val').textContent = Math.round(d.loginOverlayOpacity * 100) + '%';
+    }
+    if (d.appBackgroundBlur !== undefined) {
+      document.getElementById('appBackgroundBlur').value = d.appBackgroundBlur;
+      document.getElementById('bg-blur-val').textContent = d.appBackgroundBlur + 'px';
+    }
+  } catch {}
+}
+
+function showBgPreview(type, src) {
+  const p = document.getElementById(type + '-preview');
+  const box = document.getElementById(type + '-drop');
+  const removeBtn = document.getElementById('btn-remove-' + type + '-bg');
+  p.src = src; p.classList.add('show');
+  box.classList.add('has-image');
+  if (removeBtn) removeBtn.style.display = 'inline-flex';
+}
+
+function handleDragOver(e) { e.preventDefault(); }
+function handleDrop(e, type) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) processImageFile(file, type);
+}
+function handleBgSelect(e, type) {
+  const file = e.target.files[0];
+  if (file) processImageFile(file, type);
+}
+
+function processImageFile(file, type) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let { width, height } = img;
+      if (width > MAX_BG_W || height > MAX_BG_H) {
+        const ratio = Math.min(MAX_BG_W / width, MAX_BG_H / height);
+        width = Math.round(width * ratio); height = Math.round(height * ratio);
+      }
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        bgFiles[type] = new File([blob], `${type}-bg.jpg`, { type: 'image/jpeg' });
+        const url = URL.createObjectURL(blob);
+        showBgPreview(type, url);
+        document.getElementById('btn-upload-' + type + '-bg').disabled = false;
+      }, 'image/jpeg', 0.88);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadBg(type) {
+  const btn = document.getElementById('btn-upload-' + type + '-bg');
+  if (!bgFiles[type]) return;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  const fd = new FormData(); fd.append('image', bgFiles[type]);
+  try {
+    const r = await fetch(`/api/customize/background/${type}`, { method:'POST', body: fd });
+    const d = await r.json();
+    if (d.success) { showAlert(type + '-bg-alert','success','✓ Uploaded.'); bgFiles[type] = null; btn.disabled = true; }
+    else           { showAlert(type + '-bg-alert','error','✗ ' + d.error); }
+  } catch { showAlert(type + '-bg-alert','error','✗ Upload failed.'); }
+  btn.innerHTML = 'Upload'; btn.disabled = !bgFiles[type];
+}
+
+async function removeBg(type) {
+  await fetch(`/api/customize/background/${type}`, { method:'DELETE' });
+  const p = document.getElementById(type + '-preview');
+  p.src = ''; p.classList.remove('show');
+  document.getElementById(type + '-drop').classList.remove('has-image');
+  document.getElementById('btn-remove-' + type + '-bg').style.display = 'none';
+  bgFiles[type] = null;
+}
+
+async function saveBgSettings() {
+  const body = {
+    loginOverlayOpacity: parseFloat(document.getElementById('loginOverlayOpacity').value),
+    appBackgroundBlur:   parseInt(document.getElementById('appBackgroundBlur').value),
+  };
+  await fetch('/api/customize/theme', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+  showAlert('bg-save-alert','success','✓ Background settings saved.');
+}
+
+// ─────────────────────────────────────────────────────────────
+// RANKS
+// ─────────────────────────────────────────────────────────────
+async function loadRanks() {
+  try {
+    const r = await fetch('/api/ranks');
+    ranksData = await r.json();
+    renderRanks();
+  } catch { document.getElementById('ranks-grid').innerHTML = '<div style="color:var(--red);font-size:13px">Failed to load ranks.</div>'; }
+}
+
+function renderRanks() {
+  const grid = document.getElementById('ranks-grid');
+  if (!ranksData.length) { grid.innerHTML = '<div style="color:var(--muted);font-size:13px">No ranks yet. Add your first rank.</div>'; return; }
+  grid.innerHTML = ranksData.map(r => `
+    <div class="rank-card">
+      <div class="rank-icon-wrap" onclick="triggerIconUpload(${r.id})" title="Click to upload icon">
+        ${r.icon_path
+          ? `<img src="${r.icon_path}?t=${Date.now()}" alt="${r.name}">`
+          : `<span class="rank-icon-placeholder">🏅</span>`}
+      </div>
+      <input type="file" class="hidden" id="icon-input-${r.id}" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleIconUpload(event,${r.id})">
+      <div class="rank-name">${r.name}</div>
+      <div class="rank-abbr">${r.abbreviation || '—'}</div>
+      <div class="rank-grade">${r.grade || ''}</div>
+      <div class="rank-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openRankModal(${r.id})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRank(${r.id})">Del</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function triggerIconUpload(rankId) {
+  document.getElementById(`icon-input-${rankId}`).click();
+}
+
+function handleIconUpload(event, rankId) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const size = 128;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      // Center-crop to square
+      const s = Math.min(img.width, img.height);
+      const sx = (img.width - s) / 2, sy = (img.height - s) / 2;
+      ctx.drawImage(img, sx, sy, s, s, 0, 0, size, size);
+      canvas.toBlob(async (blob) => {
+        const fd = new FormData();
+        fd.append('icon', new File([blob], 'icon.png', { type: 'image/png' }));
+        const r = await fetch(`/api/ranks/${rankId}/icon`, { method:'POST', body:fd });
+        const d = await r.json();
+        if (d.success) { showAlert('ranks-alert','success','✓ Icon updated.'); loadRanks(); }
+        else { showAlert('ranks-alert','error','✗ ' + d.error); }
+      }, 'image/png');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function openRankModal(id) {
+  document.getElementById('rank-modal-alert').className = 'alert';
+  if (id) {
+    const r = ranksData.find(x => x.id === id);
+    if (!r) return;
+    document.getElementById('rank-modal-title').textContent = 'Edit Rank';
+    document.getElementById('rank-edit-id').value = id;
+    document.getElementById('rank-name').value = r.name;
+    document.getElementById('rank-abbr').value = r.abbreviation || '';
+    document.getElementById('rank-grade').value = r.grade || '';
+    document.getElementById('rank-tier').value = r.tier || 0;
+  } else {
+    document.getElementById('rank-modal-title').textContent = 'Add Rank';
+    document.getElementById('rank-edit-id').value = '';
+    ['rank-name','rank-abbr','rank-grade','rank-tier'].forEach(id => document.getElementById(id).value = '');
+  }
+  openModal('rank-modal');
+}
+
+async function saveRank() {
+  const id = document.getElementById('rank-edit-id').value;
+  const body = {
+    name:         document.getElementById('rank-name').value.trim(),
+    abbreviation: document.getElementById('rank-abbr').value.trim(),
+    grade:        document.getElementById('rank-grade').value.trim(),
+    tier:         parseInt(document.getElementById('rank-tier').value) || 0,
+  };
+  if (!body.name) { showAlert('rank-modal-alert','error','Name is required.',0); return; }
+  const url    = id ? `/api/ranks/${id}` : '/api/ranks';
+  const method = id ? 'PUT' : 'POST';
+  try {
+    const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) { showAlert('rank-modal-alert','error','✗ ' + (d.error || 'Failed.'),0); return; }
+    closeModal('rank-modal');
+    showAlert('ranks-alert','success','✓ Rank saved.');
+    loadRanks();
+  } catch { showAlert('rank-modal-alert','error','✗ Request failed.',0); }
+}
+
+async function deleteRank(id) {
+  if (!confirm('Delete this rank? This cannot be undone.')) return;
+  await fetch(`/api/ranks/${id}`, { method:'DELETE' });
+  showAlert('ranks-alert','success','✓ Rank deleted.');
+  loadRanks();
+}
+
+// ─────────────────────────────────────────────────────────────
+// ORGANIZATION
+// ─────────────────────────────────────────────────────────────
+async function loadOrg() {
+  try {
+    const r = await fetch('/api/organization');
+    orgData = await r.json();
+    renderOrg();
+  } catch { document.getElementById('org-tree').innerHTML = '<div style="color:var(--red);font-size:13px">Failed to load organization.</div>'; }
+}
+
+function renderOrg() {
+  const tree = document.getElementById('org-tree');
+  if (!orgData.length) { tree.innerHTML = '<div style="color:var(--muted);font-size:13px">No platoons yet. Add your first platoon.</div>'; return; }
+  tree.innerHTML = orgData.map(p => `
+    <div class="org-platoon">
+      <div class="org-platoon-header" onclick="toggleExpand(this)">
+        <span class="expand">▶</span>
+        <span class="org-platoon-designation">${p.designation || ''}</span>
+        <span class="org-platoon-name">${p.name}</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;margin-right:8px">${p.type || ''}</span>
+        <div class="btn-row" onclick="event.stopPropagation()">
+          <button class="btn btn-ghost btn-sm" onclick="openOrgModal('squad',${p.id})">+ Squad</button>
+          <button class="btn btn-ghost btn-sm" onclick="openPosModal('platoon',${p.id})">+ Position</button>
+          <button class="btn btn-ghost btn-sm" onclick="openOrgModal('platoon',null,${p.id})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteOrg('platoon',${p.id})">Del</button>
+        </div>
+      </div>
+      <div class="org-platoon-body">
+        ${renderPositions(p.positions, 'platoon', p.id)}
+        ${p.squads.map(s => renderSquad(s)).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSquad(s) {
+  return `
+    <div class="org-squad">
+      <div class="org-squad-header" onclick="toggleExpand(this,'org-squad-body')">
+        <span class="expand" style="color:var(--muted);font-size:10px;margin-right:4px">▶</span>
+        <span class="org-squad-name">${s.name}${s.designation ? ` <span style="color:var(--muted);font-size:10px;font-family:var(--mono)">(${s.designation})</span>` : ''}</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted);margin:0 8px">max ${s.max_size || 9}</span>
+        <div class="btn-row" onclick="event.stopPropagation()">
+          <button class="btn btn-ghost btn-sm" onclick="openOrgModal('fireteam',${s.id})">+ Team</button>
+          <button class="btn btn-ghost btn-sm" onclick="openPosModal('squad',${s.id})">+ Position</button>
+          <button class="btn btn-ghost btn-sm" onclick="openOrgModal('squad',null,${s.id})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteOrg('squad',${s.id})">Del</button>
+        </div>
+      </div>
+      <div class="org-squad-body">
+        ${renderPositions(s.positions, 'squad', s.id)}
+        <div class="org-fireteam-list">
+          ${s.fireteams.map(f => `
+            <div class="org-fireteam">
+              <span>${f.name}</span>
+              <span class="type-badge">${f.type}</span>
+              <span class="size">max ${f.max_size}</span>
+              <button class="btn btn-ghost btn-sm" onclick="openOrgModal('fireteam',null,${f.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteOrg('fireteam',${f.id})">Del</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPositions(positions, unitType, unitId) {
+  if (!positions || !positions.length) return '';
+  return `
+    <div class="org-positions">
+      ${positions.map(p => `
+        <div class="position-item">
+          <span style="flex:1">${p.title}</span>
+          ${p.abbreviation ? `<span style="font-family:var(--mono);font-size:10px;color:var(--accent2)">${p.abbreviation}</span>` : ''}
+          ${p.is_lead ? `<span class="pos-lead">LEAD</span>` : ''}
+          <button class="btn btn-danger btn-sm" onclick="deleteOrg('position',${p.id})">Del</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function toggleExpand(header, bodyClass = 'org-platoon-body') {
+  header.classList.toggle('open');
+  header.nextElementSibling.classList.toggle('open');
+}
+
+function openOrgModal(type, parentId = null, editId = null) {
+  document.getElementById('org-modal-alert').className = 'alert';
+  document.getElementById('org-modal-type').value = type;
+  document.getElementById('org-modal-parent-id').value = parentId || '';
+  document.getElementById('org-modal-edit-id').value = editId || '';
+
+  const labels = { platoon: 'Platoon', squad: 'Squad', fireteam: 'Team / Fireteam' };
+  document.getElementById('org-modal-title').textContent = editId ? `Edit ${labels[type]}` : `Add ${labels[type]}`;
+  document.getElementById('org-save-btn').textContent = editId ? 'Save Changes' : 'Add';
+
+  // Show/hide fields based on type
+  document.getElementById('org-type-field').style.display = type === 'platoon' ? 'block' : 'none';
+  document.getElementById('org-size-field').style.display = type !== 'platoon' ? 'block' : 'none';
+  document.getElementById('org-ft-type-field').style.display = type === 'fireteam' ? 'block' : 'none';
+  document.getElementById('org-designation-field').style.display = type !== 'fireteam' ? 'block' : 'none';
+
+  // Pre-fill if editing
+  if (editId) {
+    let item = null;
+    if (type === 'platoon') item = orgData.find(p => p.id === editId);
+    if (type === 'squad')   orgData.forEach(p => { const s = p.squads?.find(s => s.id === editId); if(s) item = s; });
+    if (type === 'fireteam') orgData.forEach(p => p.squads?.forEach(s => { const f = s.fireteams?.find(f => f.id === editId); if(f) item = f; }));
+    if (item) {
+      document.getElementById('org-name').value = item.name || '';
+      document.getElementById('org-designation').value = item.designation || '';
+      document.getElementById('org-max-size').value = item.max_size || '';
+      document.getElementById('org-notes').value = item.notes || '';
+    }
+  } else {
+    ['org-name','org-designation','org-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('org-max-size').value = type === 'fireteam' ? 4 : 9;
+  }
+
+  openModal('org-modal');
+}
+
+async function saveOrgItem() {
+  const type = document.getElementById('org-modal-type').value;
+  const parentId = document.getElementById('org-modal-parent-id').value;
+  const editId = document.getElementById('org-modal-edit-id').value;
+  const name = document.getElementById('org-name').value.trim();
+  if (!name) { showAlert('org-modal-alert','error','Name is required.',0); return; }
+
+  let url, method, body = { name, notes: document.getElementById('org-notes').value };
+
+  if (editId) {
+    url = `/api/organization/${type}s/${editId}`;
+    method = 'PUT';
+    body.designation = document.getElementById('org-designation').value;
+    body.max_size = parseInt(document.getElementById('org-max-size').value) || undefined;
+  } else {
+    url = `/api/organization/${type}s`;
+    method = 'POST';
+    if (type === 'platoon') { body.type = document.getElementById('org-type').value; }
+    if (type === 'squad')   { body.platoon_id = parseInt(parentId); body.max_size = parseInt(document.getElementById('org-max-size').value) || 9; body.designation = document.getElementById('org-designation').value; }
+    if (type === 'fireteam') { body.squad_id = parseInt(parentId); body.type = document.getElementById('org-ft-type').value; body.max_size = parseInt(document.getElementById('org-max-size').value) || 4; }
+  }
+
+  try {
+    const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) { showAlert('org-modal-alert','error','✗ ' + (d.error || 'Failed.'),0); return; }
+    closeModal('org-modal'); showAlert('org-alert','success','✓ Saved.'); loadOrg();
+  } catch { showAlert('org-modal-alert','error','✗ Request failed.',0); }
+}
+
+async function deleteOrg(type, id) {
+  const label = type === 'position' ? 'position' : type;
+  if (!confirm(`Delete this ${label}? All nested items will also be removed.`)) return;
+  const urls = { platoon:`/api/organization/platoons/${id}`, squad:`/api/organization/squads/${id}`, fireteam:`/api/organization/fireteams/${id}`, position:`/api/organization/positions/${id}` };
+  await fetch(urls[type], { method:'DELETE' });
+  showAlert('org-alert','success','✓ Deleted.'); loadOrg();
+}
+
+function openPosModal(unitType, unitId, editId = null) {
+  document.getElementById('pos-modal-alert').className = 'alert';
+  document.getElementById('pos-unit-type').value = unitType;
+  document.getElementById('pos-unit-id').value = unitId;
+  document.getElementById('pos-edit-id').value = editId || '';
+  document.getElementById('pos-modal-title').textContent = editId ? 'Edit Position' : `Add Position`;
+  document.getElementById('pos-title').value = '';
+  document.getElementById('pos-abbr').value = '';
+  document.getElementById('pos-is-lead').checked = false;
+  openModal('pos-modal');
+}
+
+async function savePosition() {
+  const unitType = document.getElementById('pos-unit-type').value;
+  const unitId   = document.getElementById('pos-unit-id').value;
+  const editId   = document.getElementById('pos-edit-id').value;
+  const title    = document.getElementById('pos-title').value.trim();
+  if (!title) { showAlert('pos-modal-alert','error','Title is required.',0); return; }
+  const body = {
+    unit_type: unitType, unit_id: parseInt(unitId),
+    title, abbreviation: document.getElementById('pos-abbr').value.trim(),
+    is_lead: document.getElementById('pos-is-lead').checked,
+  };
+  const url    = editId ? `/api/organization/positions/${editId}` : '/api/organization/positions';
+  const method = editId ? 'PUT' : 'POST';
+  try {
+    const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    if (!r.ok) { const d = await r.json(); showAlert('pos-modal-alert','error','✗ ' + (d.error||'Failed.'),0); return; }
+    closeModal('pos-modal'); showAlert('org-alert','success','✓ Position saved.'); loadOrg();
+  } catch { showAlert('pos-modal-alert','error','✗ Failed.',0); }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────────────────────
+loadTheme();
+</script>
+</body>
+</html>

@@ -5,12 +5,26 @@
 
   "primaryColor": "#1e40af",
   "accentColor": "#3b82f6",
+  "sidebarColor": "#080e1a",
+  "navbarColor": "#080e1a",
+  "cardColor": "#0d1525",
+  "textColor": "#c8d8e8",
+  "dangerColor": "#ef4444",
+  "successColor": "#22c55e",
+
+  "theme": "dark",
+
+  "loginBackground": null,
+  "appBackground": null,
+  "loginOverlayOpacity": 0.6,
+  "appBackgroundBlur": 0,
+
+  "customCSS": "",
 
   "discordGuildId": "",
   "discordBotToken": "",
 
   "timezone": "America/New_York",
-  "theme": "dark",
 
   "welcomeMessage": "Welcome to PERSCOM. Please log in to continue.",
 
