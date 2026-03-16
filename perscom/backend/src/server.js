@@ -70,7 +70,6 @@ app.use('/uploads', express.static(uploadsDir));
 
 // ─── First-Run Setup Guard ────────────────────────────────────────────────────
 app.use(setupGuard);
-app.get('/setup', (req, res) => res.redirect('/setup/')); // canonical trailing slash handled by route
 app.use('/setup', setupRoutes);
 app.use('/api/setup', setupRoutes);
 
