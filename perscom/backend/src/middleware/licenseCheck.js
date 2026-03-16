@@ -12,6 +12,12 @@ const GRACE_PERIOD_MS = 72 * 60 * 60 * 1000;         // 72-hour grace if server 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 3000;
 
+// ─── Dev / Local Test Key ────────────────────────────────────────────────────
+// This key bypasses remote validation in non-production environments only.
+// It is intentionally public — it grants no real license and is rejected
+// in production (NODE_ENV=production).
+const DEV_LICENSE_KEY = 'PCMA-DEV-0000-0000-0000';
+
 let licenseState = {
   valid: false,
   unitName: null,
@@ -57,6 +63,21 @@ async function performValidation() {
       error: 'PERSCOM_LICENSE_KEY is not set in environment variables.',
       lastChecked: new Date().toISOString(),
     };
+    return licenseState;
+  }
+
+  // ── Dev key bypass (non-production only) ────────────────────────────────
+  if (key === DEV_LICENSE_KEY && process.env.NODE_ENV !== 'production') {
+    licenseState = {
+      valid: true,
+      unitName: 'Development Instance',
+      expiresAt: '2099-12-31',
+      plan: 'dev',
+      lastChecked: new Date().toISOString(),
+      lastSuccessfulCheck: new Date().toISOString(),
+      error: null,
+    };
+    console.log('[PERSCOM License] ✓ Dev license key accepted (non-production mode)');
     return licenseState;
   }
 
