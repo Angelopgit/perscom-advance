@@ -48,9 +48,17 @@ const unitConfig = getUnitConfig();
 // ─── CORS ────────────────────────────────────────────────────────────────────
 // APP_DOMAIN must match exactly: include https:// but NO trailing slash
 // e.g. APP_DOMAIN=https://yourdomain.com
+const appDomain = process.env.APP_DOMAIN || '';
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.APP_DOMAIN, process.env.APP_DOMAIN?.replace(/\/$/, '')].filter(Boolean)
-  : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
+  ? [appDomain, appDomain.replace(/\/$/, '')].filter(Boolean)
+  : [
+      'http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173',
+      // Allow the server's own origin so pages served by the backend
+      // (e.g. setup wizard, admin panel) can call the API without CORS errors
+      `http://localhost:${process.env.PORT || 3001}`,
+      `http://127.0.0.1:${process.env.PORT || 3001}`,
+      appDomain,
+    ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, cb) => {
