@@ -1,11 +1,12 @@
 'use strict';
 
-const RELEASES_URL = 'https://api.github.com/repos/perscomadvance/perscom-advance/releases/latest';
+// Points to the actual repo where releases are published
+const RELEASES_URL = 'https://api.github.com/repos/Angelopgit/perscom-advance/releases/latest';
 
 async function checkForUpdates() {
   try {
-    const pkg = require('../../package.json');
-    const currentVersion = pkg.version;
+    let currentVersion = '1.0.0';
+    try { currentVersion = require('../package.json').version; } catch {}
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
@@ -33,16 +34,17 @@ async function checkForUpdates() {
 
     if (isNewer) {
       console.log('');
-      console.log('┌─────────────────────────────────────────┐');
-      console.log(`│  PERSCOM Advance Update Available        │`);
-      console.log(`│  Current: v${currentVersion.padEnd(10)} Latest: v${latestVersion.padEnd(9)}│`);
-      console.log('│  Run: git pull && npm install            │');
-      console.log('│  then rebuild frontend and restart.      │');
-      console.log('└─────────────────────────────────────────┘');
+      console.log('┌──────────────────────────────────────────────┐');
+      console.log('│   ⬆  PERSCOM Advance Update Available         │');
+      console.log(`│   Current: v${currentVersion.padEnd(10)}  Latest: v${latestVersion.padEnd(9)} │`);
+      console.log('│   Run: git pull && npm install               │');
+      console.log('│   Then: cd ../frontend && npm run build      │');
+      console.log('│   Then: restart the server                   │');
+      console.log('└──────────────────────────────────────────────┘');
       console.log('');
     }
   } catch {
-    // Update check is non-critical, silently ignore all errors
+    // Update check is non-critical — silently ignore all errors
   }
 }
 

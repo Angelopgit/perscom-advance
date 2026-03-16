@@ -74,7 +74,7 @@ To ensure smooth updates, avoid modifying core files. Instead:
 - ✅ Upload logos and assets via the admin panel
 - ❌ Do not modify files in `src/` directly — your changes will be overwritten on `git pull`
 
-If you need custom behavior beyond what the config provides, open a feature request at [github.com/perscomadvance/perscom-advance/issues](https://github.com/perscomadvance/perscom-advance/issues).
+If you need custom behavior beyond what the config provides, open a feature request at [github.com/Angelopgit/perscom-advance/issues](https://github.com/Angelopgit/perscom-advance/issues).
 
 ---
 

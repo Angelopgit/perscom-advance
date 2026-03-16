@@ -1,6 +1,4 @@
 {
-  "_comment": "PERSCOM Advance — Unit Configuration File. Edit these values to brand PERSCOM for your unit.",
-
   "unitName": "My Milsim Unit",
   "unitAbbreviation": "MMU",
   "unitLogo": "/uploads/logo.png",

@@ -5,67 +5,88 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const fs = require('fs');
 
 const { validateLicenseOnStartup, isLicenseValid, getLicenseInfo, licenseGate } = require('./middleware/licenseCheck');
 const { getUnitConfig } = require('./config/unitConfig');
-const { initializeDatabase } = require('./config/database');
 const { checkForUpdates } = require('./utils/updateChecker');
+const { setupGuard } = require('./middleware/setupGuard');
+const setupRoutes   = require('./routes/setup');
+
+// ─── Ensure required directories exist ───────────────────────────────────────
+const uploadsDir = path.join(__dirname, '../uploads');
+const dataDir    = path.join(__dirname, '../data');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+if (!fs.existsSync(dataDir))    fs.mkdirSync(dataDir,    { recursive: true });
+
+// ─── Database ─────────────────────────────────────────────────────────────────
+const { initializeDatabase } = require('./config/database');
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
-const authRoutes         = require('./routes/auth');
-const personnelRoutes    = require('./routes/personnel');
-const operationsRoutes   = require('./routes/operations');
-const evaluationsRoutes  = require('./routes/evaluations');
+const authRoutes          = require('./routes/auth');
+const personnelRoutes     = require('./routes/personnel');
+const operationsRoutes    = require('./routes/operations');
+const evaluationsRoutes   = require('./routes/evaluations');
 const announcementsRoutes = require('./routes/announcements');
-const dashboardRoutes    = require('./routes/dashboard');
-const orbatRoutes        = require('./routes/orbat');
-const activityRoutes     = require('./routes/activity');
-const settingsRoutes     = require('./routes/settings');
-const documentsRoutes    = require('./routes/documents');
-const gearRoutes         = require('./routes/gear');
-const usersRoutes        = require('./routes/users');
-const attendanceRoutes   = require('./routes/attendance');
-const spotlightsRoutes   = require('./routes/spotlights');
-const ranksRoutes        = require('./routes/ranks');
+const dashboardRoutes     = require('./routes/dashboard');
+const orbatRoutes         = require('./routes/orbat');
+const activityRoutes      = require('./routes/activity');
+const settingsRoutes      = require('./routes/settings');
+const documentsRoutes     = require('./routes/documents');
+const gearRoutes          = require('./routes/gear');
+const usersRoutes         = require('./routes/users');
+const attendanceRoutes    = require('./routes/attendance');
+const spotlightsRoutes    = require('./routes/spotlights');
+const ranksRoutes         = require('./routes/ranks');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const unitConfig = getUnitConfig();
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
+// APP_DOMAIN must match exactly: include https:// but NO trailing slash
+// e.g. APP_DOMAIN=https://yourdomain.com
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.APP_DOMAIN].filter(Boolean)
+  ? [process.env.APP_DOMAIN, process.env.APP_DOMAIN?.replace(/\/$/, '')].filter(Boolean)
   : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
 
 app.use(cors({
   origin: (origin, cb) => {
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error(`CORS: origin ${origin} not allowed`));
+    cb(new Error(`CORS: origin ${origin} not allowed. Check APP_DOMAIN in .env`));
   },
   credentials: true,
 }));
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // ─── Static Uploads ───────────────────────────────────────────────────────────
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(uploadsDir));
+
+// ─── First-Run Setup Guard ────────────────────────────────────────────────────
+app.use(setupGuard);
+app.get('/setup', (req, res) => res.redirect('/setup/')); // canonical trailing slash handled by route
+app.use('/setup', setupRoutes);
+app.use('/api/setup', setupRoutes);
 
 // ─── Health Check (no license gate) ──────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   const info = getLicenseInfo();
+  let version = '1.0.0';
+  try { version = require('../package.json').version; } catch {}
   res.json({
     status: 'ok',
-    version: require('../../package.json').version,
+    version,
     licensed: isLicenseValid(),
     unit: info.unitName || unitConfig.unitName,
     environment: process.env.NODE_ENV,
   });
 });
 
-// ─── License Gate (all API routes below this require a valid license) ─────────
+// ─── License Gate (all API routes below require a valid license) ──────────────
 app.use('/api', licenseGate);
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
@@ -88,10 +109,12 @@ app.use('/api/ranks',         ranksRoutes);
 // ─── Frontend (Production) ────────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production') {
   const frontendDist = path.join(__dirname, '../../frontend/dist');
-  app.use(express.static(frontendDist));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendDist, 'index.html'));
-  });
+  if (fs.existsSync(frontendDist)) {
+    app.use(express.static(frontendDist));
+    app.get('*', (req, res) => res.sendFile(path.join(frontendDist, 'index.html')));
+  } else {
+    console.warn('[PERSCOM] WARNING: frontend/dist not found. Run: cd ../frontend && npm run build');
+  }
 }
 
 // ─── Global Error Handler ─────────────────────────────────────────────────────
@@ -102,33 +125,33 @@ app.use((err, req, res, next) => {
 
 // ─── Startup ──────────────────────────────────────────────────────────────────
 async function start() {
-  // Initialize database
   initializeDatabase();
-
-  // Validate license (non-blocking startup but gate will reject requests if invalid)
   await validateLicenseOnStartup();
-
-  // Check for available updates (non-blocking)
   checkForUpdates().catch(() => {});
 
-  // Start Discord bot asynchronously (does not block startup)
-  try {
-    const { startBot } = require('./bot/discord');
-    startBot().catch((err) => console.warn('[PERSCOM Discord] Bot startup failed:', err.message));
-  } catch {
-    // Discord bot module not configured — skip
+  // Discord bot — optional, skipped if not configured
+  if (unitConfig.discordBotToken || process.env.DISCORD_BOT_TOKEN) {
+    try {
+      const { startBot } = require('./bot/discord');
+      startBot().catch((err) => console.warn('[PERSCOM Discord] Bot startup failed:', err.message));
+    } catch (err) {
+      console.warn('[PERSCOM Discord] Bot module not found — Discord integration skipped.');
+    }
   }
 
   app.listen(PORT, () => {
     const cfg = getUnitConfig();
+    let version = '1.0.0';
+    try { version = require('../package.json').version; } catch {}
     console.log('');
     console.log('╔════════════════════════════════════════╗');
     console.log('║       PERSCOM Advance is running       ║');
     console.log('╚════════════════════════════════════════╝');
     console.log(`  Unit    : ${cfg.unitName} (${cfg.unitAbbreviation})`);
+    console.log(`  Version : v${version}`);
     console.log(`  Port    : ${PORT}`);
-    console.log(`  Mode    : ${process.env.NODE_ENV}`);
-    console.log(`  License : ${isLicenseValid() ? '✓ Valid' : '✗ Invalid'}`);
+    console.log(`  Mode    : ${process.env.NODE_ENV || 'development'}`);
+    console.log(`  License : ${isLicenseValid() ? '✓ Valid' : '✗ Invalid — check PERSCOM_LICENSE_KEY in .env'}`);
     console.log('');
   });
 }
