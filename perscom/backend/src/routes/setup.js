@@ -55,8 +55,15 @@ router.get('/status', (req, res) => {
 // ── POST /api/setup/validate-license ─────────────────────────────────────────
 router.post('/validate-license', async (req, res) => {
   const { licenseKey } = req.body;
-  if (!licenseKey || !/^PCMA-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(licenseKey)) {
+  if (!licenseKey || !/^PCMA-[A-Z0-9]{3,4}-[A-Z0-9]{3,4}-[A-Z0-9]{3,4}-[A-Z0-9]{3,4}$/.test(licenseKey)) {
     return res.json({ valid: false, message: 'Invalid license key format. Expected: PCMA-XXXX-XXXX-XXXX-XXXX' });
+  }
+
+  // Dev key — accepted in non-production without hitting the license server
+  if (licenseKey === 'PCMA-DEV-0000-0000-0000' && process.env.NODE_ENV !== 'production') {
+    const state = getSetupState();
+    saveSetupState({ ...state, step: Math.max(state.step || 0, 1), licenseKey });
+    return res.json({ valid: true, message: '✓ Dev license key accepted.' });
   }
 
   try {
